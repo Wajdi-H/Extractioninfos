@@ -5,9 +5,9 @@ import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
 import java.io.File;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -123,13 +123,12 @@ public class ExtractinfosApplication {
                       if((Tabresult[i].contains("DAT")) ){
                           try{
 
-                              Pattern p = Pattern.compile("^([0-9]{2})\\/([0-9]{2})\\/([0-9]{4})");
+                              Pattern p = Pattern.compile("^(((0[13578]|(10|12))/(0[1-9]|[1-2][0-9]|3[0-1]))|(02/(0[1-9]|[1-2][0-9]))|((0[469]|11)/(0[1-9]|[1-2][0-9]|30)))/[0-9]{4}$");
                               Matcher m = p.matcher(Tabresult[i]);
                               m.matches();
-
                               while(m.find()){
-                                  System.out.println(">> "+ m.group());
 
+                                  System.out.println(">> "+ m.group());
                               }
                           } catch (Exception e ){
                               System.out.println("errTOTAL");
