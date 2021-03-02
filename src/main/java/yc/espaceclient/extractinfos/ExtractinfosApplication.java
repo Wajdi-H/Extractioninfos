@@ -20,7 +20,7 @@ public class ExtractinfosApplication {
         PieceComptable Pc =new PieceComptable();
           //  File imageFile = new File("/home/wajdi/Downloads/555.bmp");
                 //File imageFile = new File("/home/wajdi/Desktop/PFE/pngimgeconverted/abc.jpg");
-          File imageFile = new File("/home/wajdi/Desktop/PFE/facttest.jpeg");
+          File imageFile = new File("/home/wajdi/Desktop/PFE/lasttest.jpg");
 
         ITesseract instance = new Tesseract();  // JNA Interface Mapping
             // ITesseract instance = new Tesseract1(); // JNA Direct Mapping
@@ -91,10 +91,10 @@ public class ExtractinfosApplication {
                                    Pattern p1 = Pattern.compile("\\d*%");
 
                                    Matcher m1 = p1.matcher(Tabresult[i]);
-                                   m.matches();
+                                   m1.matches();
                                    while (m1.find()) {
                                        System.out.println(">> " + m1.group());
-                                       Pc.setTauxTVA(m.group());
+                                       Pc.setTauxTVA(m1.group());
                                    }
 
                                }
@@ -149,7 +149,7 @@ public class ExtractinfosApplication {
                       }
 
 
-                      if(((Tabresult[i].contains("FACTURE")))&&((Tabresult[i].contains("No"))||(Tabresult[i].contains("N°"))) ){
+                      if(((Tabresult[i].contains("FACTURE"))||((Tabresult[i].contains("TICKET")))&&((Tabresult[i].contains("No"))||(Tabresult[i].contains("N°")))  )){
                           try{
 
                          /*     Pattern p = Pattern.compile("^°");
@@ -164,8 +164,13 @@ public class ExtractinfosApplication {
                                       for(int j=0;j<FactureNumero.length;j++)
                               {
                                        if((FactureNumero[j].contains("°"))||(FactureNumero[j].contains("NO"))){
-                                        Pc.setNumfacture(FactureNumero[j+1]);
-                                  }
+                                           if(j==FactureNumero.length-1){
+                                               Pc.setNumfacture(FactureNumero[j].substring(FactureNumero[j].indexOf("°")+1,FactureNumero[j].length()));
+                                           }
+                                           else {
+                                               Pc.setNumfacture(FactureNumero[j + 1]);
+                                           }
+                                           }
                               }
                           } catch (Exception e ){
                               System.out.println("errTOTAL");
