@@ -6,6 +6,8 @@ import net.sourceforge.tess4j.TesseractException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
@@ -17,7 +19,7 @@ public class ExtractinfosApplication {
     public static void main(String[] args) {
         PieceComptable Pc =new PieceComptable();
           //  File imageFile = new File("/home/wajdi/Downloads/555.bmp");
-              //  File imageFile = new File("/home/wajdi/Desktop/PFE/pngimgeconverted/555.jpg");
+                //File imageFile = new File("/home/wajdi/Desktop/PFE/pngimgeconverted/abc.jpg");
           File imageFile = new File("/home/wajdi/Desktop/PFE/facttest.jpeg");
 
         ITesseract instance = new Tesseract();  // JNA Interface Mapping
@@ -74,19 +76,9 @@ public class ExtractinfosApplication {
                                Tabresult[i].replaceAll(",",".");
 
                                Pc.setMontantTva(Float.parseFloat(Tabresult[i].replaceAll("[a-zA-Z$€]","")));*/
-                               if(Tabresult[i].contains("%")){
-                                   Pattern p = Pattern.compile("\\d*%");
 
-                                   Matcher m = p.matcher(Tabresult[i]);
-                                   m.matches();
-                                   while (m.find()) {
-                                       System.out.println(">> " + m.group());
-                                       Pc.setTauxTVA(m.group());
-                                   }
 
-                               }
-                               else {
-                                   Pattern p = Pattern.compile("\\d*\\. \\d+");
+                                   Pattern p = Pattern.compile("\\d*\\.\\d+");
 
                                    Matcher m = p.matcher(Tabresult[i]);
                                    m.matches();
@@ -94,7 +86,19 @@ public class ExtractinfosApplication {
                                        System.out.println(">> " + m.group());
                                        Pc.setMontantTva(Float.parseFloat(m.group()));
                                    }
+
+                               if(Tabresult[i].contains("%")){
+                                   Pattern p1 = Pattern.compile("\\d*%");
+
+                                   Matcher m1 = p1.matcher(Tabresult[i]);
+                                   m.matches();
+                                   while (m1.find()) {
+                                       System.out.println(">> " + m1.group());
+                                       Pc.setTauxTVA(m.group());
+                                   }
+
                                }
+
 
                            }
                            catch (Exception e){
@@ -123,12 +127,21 @@ public class ExtractinfosApplication {
                       if((Tabresult[i].contains("DAT")) ){
                           try{
 
-                              Pattern p = Pattern.compile("^(((0[13578]|(10|12))/(0[1-9]|[1-2][0-9]|3[0-1]))|(02/(0[1-9]|[1-2][0-9]))|((0[469]|11)/(0[1-9]|[1-2][0-9]|30)))/[0-9]{4}$");
+                              Pattern p = Pattern.compile("^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[13-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$");
                               Matcher m = p.matcher(Tabresult[i]);
                               m.matches();
                               while(m.find()){
+                                  try {
+                                      Pc.setDatepiececomptable(LocalDate.parse(m.group()));
+                                  }
+                                  catch(Exception e){
+                                      System.out.println("Invalide Date Format");
+                                  }
 
                                   System.out.println(">> "+ m.group());
+                              }
+                              if (Pc.getDatepiececomptable()==null){
+                                  Pc.setDatepiececomptable(LocalDate.now());
                               }
                           } catch (Exception e ){
                               System.out.println("errTOTAL");
@@ -138,6 +151,7 @@ public class ExtractinfosApplication {
 
                       if(((Tabresult[i].contains("FACTURE")))&&((Tabresult[i].contains("No"))||(Tabresult[i].contains("N°"))) ){
                           try{
+
                          /*     Pattern p = Pattern.compile("^°");
                               Matcher m = p.matcher(Tabresult[i]);
                               m.matches();
@@ -165,11 +179,13 @@ public class ExtractinfosApplication {
                 } catch (TesseractException e) {
                 System.err.println(e.getMessage());
             }
-        System.out.println("Total"+Pc.getMontanttotal());
-        System.out.println("TOTALHT"+Pc.getMontanttotalHT());
-        System.out.println("TVA"+Pc.getMontantTva());
-        System.out.println("TauxTVa"+Pc.getTauxTVA());
-        System.out.println("NumeroFacture"+Pc.getNumfacture());
+        System.out.println("Total:   "+Pc.getMontanttotal());
+        System.out.println("TOTALHT:   "+Pc.getMontanttotalHT());
+        System.out.println("TVA:   "+Pc.getMontantTva());
+        System.out.println("TauxTVa:  "+Pc.getTauxTVA());
+        System.out.println("NumeroFacture:   "+Pc.getNumfacture());
+        System.out.println("DateFacture:   "+Pc.getDatepiececomptable());
+
 
 
 

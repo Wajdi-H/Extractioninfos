@@ -1,10 +1,11 @@
 package yc.espaceclient.extractinfos;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class PieceComptable {
     private long id;
-    private Date datepiececomptable;
+    private LocalDate datepiececomptable;
     private String numfacture ;
     private Float Montanttotal;
     private Float MontanttotalHT;
@@ -12,7 +13,7 @@ public class PieceComptable {
     private String TauxTVA;
 
 
-    public PieceComptable(long id, Date datepiececomptable, String numfacture, Float montanttotal, Float montanttotalHT, Float montantTva, String tauxTVA) {
+    public PieceComptable(long id, LocalDate datepiececomptable, String numfacture, Float montanttotal, Float montanttotalHT, Float montantTva, String tauxTVA) {
         this.id = id;
         this.datepiececomptable = datepiececomptable;
         this.numfacture = numfacture;
@@ -33,11 +34,11 @@ public class PieceComptable {
         this.id = id;
     }
 
-    public Date getDatepiececomptable() {
+    public LocalDate getDatepiececomptable() {
         return datepiececomptable;
     }
 
-    public void setDatepiececomptable(Date datepiececomptable) {
+    public void setDatepiececomptable(LocalDate datepiececomptable) {
         this.datepiececomptable = datepiececomptable;
     }
 
