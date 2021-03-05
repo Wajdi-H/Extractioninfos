@@ -8,6 +8,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.io.File;
 import net.rationalminds.LocalDateModel;
+import sun.awt.X11.XSystemTrayPeer;
+
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -24,10 +26,11 @@ public class ExtractinfosApplication {
     public static void main(String[] args) {
         PieceComptable Pc =new PieceComptable();
         ArrayList<lignefacture> productlist =new ArrayList();
-        //   File imageFile = new File("/home/wajdi/Downloads/555.bmp");
-             //File imageFile = new File("/home/wajdi/Desktop/PFE/pngimgeconverted/abc.jpg");
-         //File imageFile = new File("/home/wajdi/Desktop/PFE/123456.jpg");
-        File imageFile = new File("/home/wajdi/Desktop/PFE/facttest.jpeg");
+        //   File imageFile = new File("/home/wajdi/Desktop//PFE/pngimgeconverted/555.jpg"); //FACTURE With TVA in ligne
+        //File imageFile = new File("/home/wajdi/Desktop/PFE/pngimgeconverted/abc.jpg"); //FACTURE
+        // File imageFile = new File("/home/wajdi/Desktop/PFE/123456.jpg");
+      //
+        File imageFile = new File("/home/wajdi/Desktop/PFE/facttest.jpeg");   //FACTURE
 
 
         ITesseract instance = new Tesseract();  // JNA Interface Mapping
@@ -53,7 +56,6 @@ public class ExtractinfosApplication {
                               while(m.find()){
                                   System.out.println(">> "+ m.group());
                                   Pc.setMontanttotalHT(Float.parseFloat(m.group()));
-
 
                               }
 
@@ -112,8 +114,8 @@ public class ExtractinfosApplication {
                       }
 
 
-                      //if((Tabresult[i].contains("DAT")) ){
-                          if((Tabresult[i].contains("/")) ){
+                      if((Tabresult[i].contains("DAT")) ){
+                        //  if((Tabresult[i].contains("/")) ){
                           try{
                              // Pattern p = Pattern.compile("^(?:(?:31(/|-|\\.)(?:0?[13578]|1[02]))\\1x|(?:(?:29|30)(/|-|\\.)(?:0?[13-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$");
                              //Pattern p = Pattern.compile("\\S(\\d{2}/\\d{2}/\\d{4})\\S");
@@ -129,15 +131,18 @@ public class ExtractinfosApplication {
                                       System.out.println("Invalide Date Format");
                                   }
                               }*/
-
                               Parser parser=new Parser();
                               List<LocalDateModel> dates=parser.parse(Tabresult[i]);
 
                               System.out.println(dates.get(0).getOriginalText());
-                              DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                              try {
+                                  DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-                              Pc.setDatepiececomptable(LocalDate.parse(dates.get(0).getOriginalText(), formatter));
-
+                                  Pc.setDatepiececomptable(LocalDate.parse(dates.get(0).getOriginalText(), formatter));
+                              }catch (Exception e)
+                              {
+                                  System.out.println("DateCannotbebuilded");
+                              }
 
                           }
                               catch (Exception e ){
@@ -162,9 +167,15 @@ public class ExtractinfosApplication {
                                           System.out.println("Invalide Date Format");
                                       }
                                   }
-                                  DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/M/yyyy");
-                                  Pc.setDatepiececomptable(LocalDate.parse(Matecheddate.substring(0,2)+"/"+getmonthnumber(FrenshMonths[l].toUpperCase())+"/"+Matecheddate.substring(2,6), formatter));
-                              }
+                                  try {
+                                      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/M/yyyy");
+                                      Pc.setDatepiececomptable(LocalDate.parse(Matecheddate.substring(0, 2) + "/" + getmonthnumber(FrenshMonths[l].toUpperCase()) + "/" + Matecheddate.substring(2, 6), formatter));
+                                  }
+                                  catch (Exception e )
+                                  {
+                                      System.out.println("Datecannotbebuilded");
+                                  }
+                                  }
 
                           }
                       }
@@ -192,6 +203,7 @@ public class ExtractinfosApplication {
                           for(int h=i+1;h<Tabresult.length-1;h++) {
                               String[] products = Tabresult[h].split(" ");
 
+
                               if (isNumeric(products[0])) {
                                   lignefacture lignefact = new lignefacture();
 
@@ -203,8 +215,8 @@ public class ExtractinfosApplication {
                                       }
                                       lignefact.setDesignation(desporduct);
                                       if ((isNumeric(products[m]) && (m != products.length - 1))) {
-                                          lignefact.setProixHT(Float.parseFloat(products[m]));
-                                          lignefact.setPrixtotal(Float.parseFloat(products[m + 1]));
+                                          lignefact.setProixHT(Float.parseFloat(products[m].replaceAll("€","")));
+                                          lignefact.setPrixtotal(Float.parseFloat(products[m + 1].replaceAll("€","")));
                                           productlist.add(lignefact);
                                       }
 
@@ -212,21 +224,39 @@ public class ExtractinfosApplication {
                               }
 
                               else {
-                                  /*   for (int a = 0; a < products.length - 1; a++) {
-                                   if (products[a].)
-                               }*/
+                                  String desporduct = "";
+                                  lignefacture lignefact = new lignefacture();
+                                  for (int m = 0; m < products.length-1 ; m++) {
+
+                                      if (!isNumeric(products[m])) {
+                                          desporduct = desporduct + " " + products[m];
+                                      }
+                                      lignefact.setDesignation(desporduct);
+                                      if (isNumeric(products[m])) {
+
+                                          lignefact.setQte(Float.parseFloat(products[m]));
+                                          if ((isNumeric(products[m+1].replaceAll("€","")) && (m+1 != products.length - 1))) {
+                                              products[m+1]=products[m+1].replaceAll("€","");
+                                              products[m+2]=products[m+2].replaceAll("€","");
+
+                                              lignefact.setProixHT(Float.parseFloat(products[m+1]));
+                                              lignefact.setPrixtotal(Float.parseFloat(products[m + 2]));
+                                              productlist.add(lignefact);
+                                          }
+                                      }
+                                  }
                               }
-
-
                           }
-
                       }
 
+                      if(((Tabresult[i].contains("QUANTIT"))||(Tabresult[i].contains("QTÉ"))||(Tabresult[i].contains("DÉSIGNATION")))&&((Tabresult[i].contains("TVA")))) {
+
+                      }
                       }
                     System.out.println(result);
 
 
-                } catch (TesseractException | ParseException e) {
+                } catch (TesseractException e) {
                 System.err.println(e.getMessage());
             }
 
